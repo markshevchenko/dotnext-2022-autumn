@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32519.379
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4BA77EEE-8795-48D1-8871-9F211F22284C}"
+	ProjectSection(SolutionItems) = preProject
+		ExpressionTrees.csx = ExpressionTrees.csx
+		Functions.csx = Functions.csx
+		Functions.fsx = Functions.fsx
+		Parser.fsx = Parser.fsx
+		Streams.csx = Streams.csx
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {CB61F2F9-E599-4AD9-ABEC-A10925556EA6}
+	EndGlobalSection
+EndGlobal
