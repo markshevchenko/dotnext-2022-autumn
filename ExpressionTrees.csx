@@ -12,6 +12,13 @@ class Book
     public Publisher Publisher { get; set; }
 
     public Author[] Authors { get; set; }
+    
+    public override string ToString()
+    {
+        return string.Join(", ", Authors.Select(a => a.GivenName + " " + a.FamilyName))
+             + ", " + Title
+             + " (Издательство " + Publisher.Title + ")";
+    }
 }
 
 class Publisher
@@ -26,15 +33,11 @@ class Author
     public string FamilyName { get; set; }
 }
 
-Expression MakeOrExpression(IEnumerable<Expression> expressions)
-{
-    Expression result = Expression.Constant(false);
+Expression MakeOrBinary(Expression a, Expression b) =>
+    Expression.MakeBinary(ExpressionType.Or, a, b);
 
-    foreach (var expression in expressions)
-        result = Expression.MakeBinary(ExpressionType.Or, result, expression);
-
-    return result;
-}
+Expression MakeOrExpression(IEnumerable<Expression> boolExpressions) =>
+    boolExpressions.Aggregate((Expression)Expression.Constant(false), MakeOrBinary);
 
 IEnumerable<Expression> GetPropertyExpressions(Expression parameter, ConstantExpression constant)
 {
@@ -71,13 +74,55 @@ IEnumerable<Expression> GetPropertyExpressions(Expression parameter, ConstantExp
 Expression<Func<T, bool>> MakeSearchExpression<T>(string value)
 {
     var constant = Expression.Constant(value);
-    var bookParameter = Expression.Parameter(typeof(T));
-    var orExpression = MakeOrExpression(GetPropertyExpressions(bookParameter, constant));
+    var parameter = Expression.Parameter(typeof(T));
+    var comparisons = GetPropertyExpressions(parameter, constant);
+    var orExpression = MakeOrExpression(comparisons);
 
-    return Expression.Lambda<Func<T, bool>>(orExpression, bookParameter);
+    return Expression.Lambda<Func<T, bool>>(orExpression, parameter);
 }
 
 WriteLine(MakeSearchExpression<Book>("Shakespeare"));
+
+var books = new []
+{
+    new Book
+    {
+        Title = "12 стульев",
+        Publisher = new Publisher { Title = "АСТ" },
+        Authors = new []
+        {
+            new Author { GivenName = "Илья", FamilyName = "Ильф" },
+            new Author { GivenName = "Евгений", FamilyName = "Петров" }
+        }
+    },
+    new Book
+    {
+        Title = "Анна Каренина",
+        Publisher = new Publisher { Title = "Азбука" },
+        Authors = new []
+        {
+            new Author { GivenName = "Лев", FamilyName = "Толстой" }
+        }
+    },
+    new Book
+    {
+        Title = "Азбука",
+        Publisher = new Publisher { Title = "АСТ" },
+        Authors = new []
+        {
+            new Author { GivenName = "Валентина", FamilyName = "Дмитриева" }
+        }
+    }
+}.AsQueryable();
+
+foreach (var book in books.Where(MakeSearchExpression<Book>("Евгений")))
+    WriteLine(book);
+
+foreach (var book in books.Where(MakeSearchExpression<Book>("Азбука")))
+    WriteLine(book);
+
+foreach (var book in books.Where(MakeSearchExpression<Book>("АСТ")))
+    WriteLine(book);
 
 // II.
 

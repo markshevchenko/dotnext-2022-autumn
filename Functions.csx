@@ -6,8 +6,8 @@ double Sqrt(double x)
 {
     double guess = 1.0;
     
-    while (Math.Abs(x - guess * guess) > x * 0.001)
-        guess = (guess + x / guess) / 2;
+    while (Math.Abs(x - Square(guess)) > x * 0.001)
+        guess = Average(guess, x / guess);
 
     return guess;
 }
@@ -16,8 +16,8 @@ double CubeRoot(double x)
 {
     double guess = 1.0;
     
-    while (Math.Abs(x - guess * guess * guess) > Math.Abs(x * 0.001))
-        guess = (guess + x / (guess * guess)) / 2;    
+    while (Math.Abs(x - Cube(guess)) > Math.Abs(x * 0.001))
+        guess = Average(guess, x / Square(guess));    
 
     return guess;
 }

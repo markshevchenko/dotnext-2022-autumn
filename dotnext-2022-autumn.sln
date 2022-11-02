@@ -6,10 +6,10 @@ MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{4BA77EEE-8795-48D1-8871-9F211F22284C}"
 	ProjectSection(SolutionItems) = preProject
 		ExpressionTrees.csx = ExpressionTrees.csx
+		Streams.csx = Streams.csx
 		Functions.csx = Functions.csx
 		Functions.fsx = Functions.fsx
 		Parser.fsx = Parser.fsx
-		Streams.csx = Streams.csx
 	EndProjectSection
 EndProject
 Global
