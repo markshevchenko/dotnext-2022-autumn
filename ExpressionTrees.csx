@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq.Expressions;
 
-// I.
 // https://stackoverflow.com/questions/44408583/linq-query-to-check-for-a-predicate-in-all-columns-in-a-table/
 
 class Book
@@ -124,52 +123,7 @@ foreach (var book in books.Where(MakeSearchExpression<Book>("Азбука")))
 foreach (var book in books.Where(MakeSearchExpression<Book>("АСТ")))
     WriteLine(book);
 
-// II.
-
-class DerivativeVisitor : ExpressionVisitor
-{
-    protected override Expression VisitConstant(ConstantExpression node)
-    {
-        return Expression.Constant(0.0);
-    }
-
-    protected override Expression VisitParameter(ParameterExpression node)
-    {
-        return Expression.Constant(1.0);
-    }
-
-    protected override Expression VisitMember(MemberExpression node)
-    {
-        return Expression.Constant(0.0);
-    }
-
-    protected override Expression VisitBinary(BinaryExpression node)
-    {
-        switch (node.NodeType)
-        {
-            case ExpressionType.Add:
-                return Expression.Add(Visit(node.Left), Visit(node.Right));
-
-            case ExpressionType.Multiply:
-                var addend = Expression.Multiply(Visit(node.Left), node.Right);
-                var augend = Expression.Multiply(node.Left, Visit(node.Right));
-                return Expression.Add(addend, augend);
-
-            default:
-                throw new InvalidOperationException("Binary operator is not applicable for derivative");
-        }
-    }
-}
-
-LambdaExpression Derivative(Expression<Func<double, double>> f)
-{
-    var derivativeVisitor = new DerivativeVisitor();
-
-    return Expression.Lambda(derivativeVisitor.Visit(f.Body), f.Parameters);
-}
-
-var a = 15.0;
-Derivative(x => a * x * (x + 3)).ToString()
+//
 
 using System.Diagnostics;
 
@@ -256,8 +210,5 @@ LambdaExpression Derivative(Expression<Func<double, double>> f)
     return Expression.Lambda(derivativeVisitor.Visit(f.Body), f.Parameters);
 }
 
+var a = 15.0;
 Derivative(x => a * x * (x + 3)).ToString()
-
-// SySharp
-// https://www.nuget.org/packages/SySharp/
-// https://github.com/markshevchenko/sysharp

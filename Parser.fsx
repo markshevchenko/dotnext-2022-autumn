@@ -10,7 +10,8 @@ let isChar c = whereChar ((=) c)
 isChar 'c' ['c'; '1'; '2']
 ['c'; '1'; '2'] |> isChar 'c'
 ['c'; '1'; '2'] |> isChar 'a'
-[] |> isChar 'c'
+"c12" |> List.ofSeq |> isChar 'a'
+"" |> List.ofSeq |> isChar 'c'
 
 let rec repeated parser chars =
     match parser chars with
@@ -18,7 +19,7 @@ let rec repeated parser chars =
                          result::results, cs
     | None, _ -> [], chars
     
-repeated (whereChar Char.IsDigit) ['1'; '3'; '7']
+"137" |> List.ofSeq |> repeated (whereChar Char.IsDigit)
     
 let repeated0 parser chars =
     let results, cs = repeated parser chars
@@ -46,18 +47,20 @@ let (.>.) parser1 parser2 combinator chars =
                       | Some s2, cs2 -> Some (combinator s1  s2), cs2
                       | _ -> None, chars
     | _ -> None, chars
-    
+
 "a3" |> List.ofSeq |> (whereChar Char.IsLetter .>. whereChar Char.IsDigit) (+)
 
 let optional defaultValue parser chars =
     match parser chars with
     | Some s, cs -> Some s, cs
     | None, cs -> Some defaultValue, cs
-    
-"a" |> List.ofSeq |> optional "NONE" (whereChar Char.IsLetter) 
-"1" |> List.ofSeq |> optional "NONE" (whereChar Char.IsLetter) 
-    
-let number = (digits .>. ((isChar '.' .>. digits) (+) |> optional "")) (+)
+
+"a" |> List.ofSeq |> optional "" (whereChar Char.IsLetter)
+"1" |> List.ofSeq |> optional "" (whereChar Char.IsLetter)
+
+let fractional_part = (isChar '.' .>. digits) (+)
+
+let number = (digits .>. optional "" fractional_part) (+)
           |> map (fun s -> Convert.ToDouble(s, CultureInfo.InvariantCulture))
           
 "321" |> List.ofSeq |> number
@@ -83,8 +86,8 @@ let (<|>) parser1 parser2 chars =
     | None, cs -> parser2 cs
     
 let rec value chars = (number
-                   <|> (isChar '(' >>. expression .>> isChar ')')
-                   <|> (isChar 's' >>. isChar 'i' >>. isChar 'n' >>. value |> map sin)) chars
+                  <|> (isChar '(' >>. expression .>> isChar ')')
+                  <|> (isChar 's' >>. isChar 'i' >>. isChar 'n' >>. value |> map sin)) chars
 and star = isChar '*' >>. value
 and slash = isChar '/' >>. value |> map ((/)1.0)
 and term = (value .>. repeated0 (star <|> slash)) (fun v vs -> v * List.fold (*) 1.0 vs)
@@ -94,10 +97,6 @@ and expression = (term .>. repeated0 (plus <|> minus)) (fun v vs -> v + List.sum
 
 //
 
-"+3.14159265" |> List.ofSeq |> plus
-"-3.14159265" |> List.ofSeq |> minus
-"*3.14159265" |> List.ofSeq |> star
-"/3.14159265" |> List.ofSeq |> slash
 "1*2*3/4" |> List.ofSeq |> expression
 "1*2+3*4" |> List.ofSeq |> expression
 "1*(2+3)*4" |> List.ofSeq |> expression

@@ -27,7 +27,8 @@ IEnumerable<BigInteger> Fibs()
 }
 
 Format(Fibs())
-Format(Fibs(), 30)
+
+//
 
 IEnumerable<BigInteger> PartialSums(IEnumerable<BigInteger> s)
 {
@@ -40,8 +41,6 @@ IEnumerable<BigInteger> PartialSums(IEnumerable<BigInteger> s)
     }
 }
 
-Format(PartialSums(Integers()))
-
 IEnumerable<double> PartialSums(IEnumerable<double> s)
 {
     double sum = 0;
@@ -52,6 +51,8 @@ IEnumerable<double> PartialSums(IEnumerable<double> s)
         yield return sum;
     }
 }
+
+Format(PartialSums(Integers()))
 
 IEnumerable<double> PiSummands()
 {
