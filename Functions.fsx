@@ -49,7 +49,7 @@ cube_root2 8.0
 let fixed_point f start_guess =
     let rec try_guess guess =
         let next = f guess
-        if abs (guess - next) < abs (0.001 * guess)
+        if abs (guess - next) < abs (0.0001 * guess)
         then next
         else try_guess next
 
