@@ -1,8 +1,9 @@
 open System
 open System.Globalization
 
-let whereChar predicate = function
-    | c::cs when predicate c -> Some (c.ToString()), cs
+let whereChar predicate chars =
+    match chars with // pattern matching
+    | c::cs when predicate c -> Some c, cs
     | cs -> None, cs
     
 let isChar c = whereChar ((=) c)
@@ -10,10 +11,10 @@ let isChar c = whereChar ((=) c)
 isChar 'c' ['c'; '1'; '2']
 ['c'; '1'; '2'] |> isChar 'c'
 ['c'; '1'; '2'] |> isChar 'a'
-"c12" |> List.ofSeq |> isChar 'a'
-"" |> List.ofSeq |> isChar 'c'
+"c12" |> List.ofSeq |> isChar 'a' // use string as input
+"" |> List.ofSeq |> isChar 'c' // check for empty input
 
-let rec internal repeated parser chars =
+let rec internal repeated parser chars = // internal
     match parser chars with
     | Some result, cs -> let results, cs = repeated parser cs 
                          result::results, cs
@@ -35,9 +36,10 @@ let map mapper parser chars =
     let result, cs = parser chars
     Option.map mapper result, cs
     
-let digits1 = whereChar Char.IsDigit
-           |> repeated1
-           |> map (String.concat "")
+let digits1 =
+    whereChar Char.IsDigit
+    |> repeated1
+    |> map (Array.ofList >> String.Concat)
 
 "321" |> List.ofSeq |> digits1
 
@@ -48,17 +50,18 @@ let (.>>.) parser1 parser2 combinator chars =
                       | _ -> None, chars
     | _ -> None, chars
 
-"a3" |> List.ofSeq |> (whereChar Char.IsLetter .>>. whereChar Char.IsDigit) (+)
+"a3" |> List.ofSeq |> (whereChar Char.IsLetter .>>. whereChar Char.IsDigit)
+                      (fun c1 c2 -> String [| c1; c2|])
 
 let optional defaultValue parser chars =
     match parser chars with
     | Some s, cs -> Some s, cs
     | None, cs -> Some defaultValue, cs
 
-"a" |> List.ofSeq |> optional "NONE" (whereChar Char.IsLetter)
-"1" |> List.ofSeq |> optional "NONE" (whereChar Char.IsLetter)
+"a" |> List.ofSeq |> optional '-' (whereChar Char.IsLetter)
+"1" |> List.ofSeq |> optional '-' (whereChar Char.IsLetter)
 
-let fractional_part = (isChar '.' .>>. digits1) (+)
+let fractional_part = (isChar '.' .>>. digits1) (fun _ fractional -> "." + fractional)
 
 let number = (digits1 .>>. optional "" fractional_part) (+)
           |> map (fun s -> Convert.ToDouble(s, CultureInfo.InvariantCulture))
