@@ -13,12 +13,12 @@ Average(3, 5)
 
 double Sqrt(double z)
 {
-    double guess = 1.0;
+    double x = 1.0;
     
-    while (Math.Abs(z - Square(guess)) > Math.Abs(0.001 * z))
-        guess = Average(guess, z / guess);
+    while (Math.Abs(z - Square(x)) > Math.Abs(0.001 * z))
+        x = Average(x, z / x);
 
-    return guess;
+    return x;
 }
 
 Sqrt(4.0)
@@ -33,12 +33,12 @@ double Cube(double x)
 
 double CubeRoot(double z)
 {
-    double guess = 1.0;
+    double x = 1.0;
     
-    while (Math.Abs(z - Cube(guess)) > Math.Abs(0.001 * z))
-        guess = Average(guess, z / Square(guess));    
+    while (Math.Abs(z - Cube(x)) > Math.Abs(0.001 * z))
+        x = Average(x, z / Square(x));    
 
-    return guess;
+    return x;
 }
 
 Cube(2)
@@ -49,24 +49,24 @@ CubeRoot(2)
 
 double Power(double x, uint k)
 {
-    double result = 1.0;
+    double power = 1.0;
     
     for (uint i = 0; i < k; i++)
-        result *= x;
+        power *= x;
 
-    return result;
+    return power;
 }
 
 Power(2, 2)
 
 double Root(double z, uint k)
 {
-    double guess = 1.0;
+    double x = 1.0;
     
-    while (Math.Abs(z - Power(guess, k)) > Math.Abs(0.001 * z))
-        guess = Average(guess, z / Power(guess, k - 1));    
+    while (Math.Abs(z - Power(x, k)) > Math.Abs(0.001 * z))
+        x = Average(x, z / Power(x, k - 1));    
 
-    return guess;
+    return x;
 }
 
 Root(4, 2)
@@ -74,3 +74,5 @@ Power(2, 3)
 Root(8, 3)
 Power(2, 4)
 Root(16, 4)
+
+//

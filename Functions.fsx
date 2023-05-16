@@ -47,27 +47,27 @@ cube_root2 8.0
 //
 
 let fixed_point1 f x1 =
-    let rec try_guess x =
+    let rec iter x =
         let x_next = f x
         if abs (x - x_next) < abs (0.001 * x)
         then x_next
-        else try_guess x_next
+        else iter x_next
     
-    try_guess x1
+    iter x1
     
 fixed_point1 (fun x -> 1.0 + 1.0/x) 1.0
 
 let fixed_point2 f x1 =
     x1 |> Seq.unfold (fun x -> Some (f x, f x)) // pipes similar to fluent syntax
        |> Seq.pairwise
-       |> Seq.find (fun (x, x_next) -> abs (x - x_next) < abs (0.001 * x))
+       |> Seq.find (fun (u, v) -> abs (u - v) < abs (0.001 * u))
        |> snd
 
 fixed_point2 (fun x -> 1.0 + 1.0/x) 1.0
 
 //
     
-// let sqrt2 z = fixed_point (fun x -> z / x) 1.0
+// let sqrt2 z = fixed_point2 (fun x -> z / x) 1.0
 let sqrt2 z = fixed_point2 (fun x -> average x (z / x)) 1.0
 
 sqrt2 2.0
@@ -129,13 +129,15 @@ let fourth_root1 y = fixed_point_of_transform (fun x -> y / cube x) average_damp
 
 fourth_root1 625.0
     
-let inline double f = fun x -> (f (f x))
+let inline double f =
+    fun x -> (f (f x))
     
 double sqrt6 625.0
     
-let inline compose f g = fun x -> (f (g x))
+let inline compose f g =
+    fun x -> (f (g x))
     
-let inc = ((+) 1.0) // operators are functions
+let inc = (+) 1.0 // operators are functions
     
 compose cube_root3 inc 7.0
 (cube_root3 << inc) 7.0
@@ -154,11 +156,11 @@ let power1 x n =
     
 power1 3.0 6
 
-let rec repeat f n =
-    if n = 1
-    then f
-    else f >> (repeat f (n - 1))
+let repeat f n =
+    fun x -> (Seq.replicate n f |> Seq.fold (>>) id) x
     
+(repeat square 3) 2.0
+
 let power2 x n = (repeat ((*) x) n) 1.0
 
 power2 3.0 6
