@@ -61,7 +61,8 @@ let optional defaultValue parser chars =
 "a" |> List.ofSeq |> optional '-' (whereChar Char.IsLetter)
 "1" |> List.ofSeq |> optional '-' (whereChar Char.IsLetter)
 
-let fractional_part = (isChar '.' .>>. digits1) (fun _ fractional -> "." + fractional)
+let fractional_part = (isChar '.' .>>. digits1)
+                        (fun _ fractional -> "." + fractional)
 
 let number = (digits1 .>>. optional "" fractional_part) (+)
           |> map (fun s -> Convert.ToDouble(s, CultureInfo.InvariantCulture))
@@ -91,20 +92,20 @@ let (<|>) parser1 parser2 chars =
 let spaces0 = repeated0 (isChar ' ')
 let spaces1 = repeated1 (isChar ' ')
 
-let rec value chars = (number .>> spaces0
-                  <|> (isChar '(' >>. spaces0 >>. expression .>> isChar ')' .>> spaces0)
-                  <|> (isChar 's' >>. isChar 'i' >>. isChar 'n' >>. spaces1
-                       >>. value .>> spaces0 |> map sin)) chars
-and star = isChar '*' >>. spaces0 >>. value .>> spaces0
-and slash = isChar '/' >>. spaces0 >>. value .>> spaces0 |> map ((/)1.0)
-and term = (value .>> spaces0 .>>. repeated0 (star <|> slash)) (List.fold (*))
-and plus = isChar '+' >>. spaces0 >>. term .>> spaces0
-and minus = isChar '-' >>. spaces0 >>. term .>> spaces0 |> map (~-)
-and expression = (term .>> spaces0 .>>. repeated0 (plus <|> minus)) (List.fold (+))
+let rec value chars = (number
+                  <|> (isChar '(' >>. expression .>> isChar ')')
+                  <|> (isChar 's' >>. isChar 'i' >>. isChar 'n'
+                       >>. value |> map sin)) chars
+and star = isChar '*' >>. value
+and slash = isChar '/' >>. value |> map ((/)1.0)
+and term = (value .>>. repeated0 (star <|> slash)) (List.fold (*))
+and plus = isChar '+' >>. term
+and minus = isChar '-' >>. term |> map (~-)
+and expression = (term .>>. repeated0 (plus <|> minus)) (List.fold (+))
 
 //
 
-"1 * 2 * 3/4" |> List.ofSeq |> expression
-"1 * 2 + 3 * 4" |> List.ofSeq |> expression
-"1 * (2 + 3) * 4" |> List.ofSeq |> expression
-"sin (3.1415 / 6)" |> List.ofSeq |> expression
+"1*2*3/4" |> List.ofSeq |> expression
+"1*2+3*4" |> List.ofSeq |> expression
+"1*(2+3)*4" |> List.ofSeq |> expression
+"sin(3.1415/6)" |> List.ofSeq |> expression

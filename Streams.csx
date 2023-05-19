@@ -72,8 +72,6 @@ Format(PiSummands())
 
 IEnumerable<double> PiStream() => PartialSums(PiSummands()).Select(x => 4 * x);
 
-Format(PiStream())
-
 IEnumerable<double> EulerTransform(IEnumerable<double> s)
 {
     using var e = s.GetEnumerator();
